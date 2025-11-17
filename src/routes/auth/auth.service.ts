@@ -4,6 +4,8 @@ import { HashingService } from 'src/shared/services/hashing.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { TokenService } from 'src/shared/services/token.service';
 import { RoleService } from './role.service';
+import { LoginBodyType, RegisterBodyType } from './auth.model';
+import { AuthRepository } from './auth.repo';
 
 @Injectable()
 export class AuthService {
@@ -12,19 +14,18 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private readonly tokenService: TokenService,
     private readonly roleService: RoleService,
+    private readonly authRepository: AuthRepository,
   ) {}
-  async register(body: any) {
+  async register(body: RegisterBodyType) {
     try {
       const clientRoleId = await this.roleService.getClientRoleId();
       const hashedPassword = await this.hashingService.hash(body.password);
-      const user = await this.prismaService.user.create({
-        data: {
-          email: body.email,
-          password: hashedPassword,
-          name: body.name,
-          phoneNumber: body.phoneNumber,
-          roleId: clientRoleId,
-        },
+      const user = await this.authRepository.createUser({
+        email: body.email,
+        password: hashedPassword,
+        name: body.name,
+        phoneNumber: body.phoneNumber,
+        roleId: clientRoleId,
       });
       return user;
     } catch (error) {
@@ -35,8 +36,8 @@ export class AuthService {
     }
   }
 
-  async login(body: any) {
-    const user = await this.prismaService.user.findFirst({
+  async login(body: LoginBodyType) {
+    const user = await this.prismaService.user.findUniqueOrThrow({
       where: {
         email: body.email,
       },

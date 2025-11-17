@@ -13,7 +13,7 @@ export class RoleService {
       return this.clientRoleId;
     }
 
-    const clientRole = await this.prismaService.role.findFirstOrThrow({
+    const clientRole = await this.prismaService.role.findUniqueOrThrow({
       where: {
         name: RoleName.Client,
       },

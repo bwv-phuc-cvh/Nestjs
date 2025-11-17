@@ -34,7 +34,7 @@ const main = async () => {
         data
     })
 
-    const adminRole = await prisma.role.findFirstOrThrow({
+    const adminRole = await prisma.role.findUniqueOrThrow({
         where:{
             name: RoleName.Admin
         }
