@@ -11,6 +11,7 @@ import { addMilliseconds } from 'date-fns';
 import envConfig from 'src/shared/config';
 import ms, { StringValue } from 'ms';
 import { VerificationCodeType } from 'generated/prisma';
+import { EmailService } from 'src/shared/services/email.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private readonly tokenService: TokenService,
     private readonly roleService: RoleService,
+    private readonly emailService: EmailService,
     private readonly authRepository: AuthRepository,
     private readonly sharedUserRepository: SharedUserRepository,
   ) {}
@@ -175,6 +177,15 @@ export class AuthService {
       type: body.type,
       expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN as StringValue)),
     });
+
+    const { error } = await this.emailService.sendOTP({ email: body.email, code });
+
+    if (error) {
+      throw new BadRequestException({
+        field: 'code',
+        message: 'OTP code sending failed',
+      });
+    }
 
     return verificationCode;
   }
