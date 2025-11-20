@@ -45,4 +45,18 @@ export class AuthRepository {
       },
     });
   }
+
+  async deleteVerificationCode(uniqueValue: { email: string; type: VerificationCodeType; code: string }) {
+    const { email, code, type } = uniqueValue;
+
+    return this.prismaService.verificationCode.delete({
+      where: {
+        email_type: {
+          email,
+          type,
+        },
+        code,
+      },
+    });
+  }
 }

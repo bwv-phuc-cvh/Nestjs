@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Resend } from 'resend';
 import envConfig from '../config';
+import PlaidVerifyIdentityEmail from 'src/emails/otp';
 
 @Injectable()
 export class EmailService {
@@ -13,8 +14,8 @@ export class EmailService {
     return this.resend.emails.send({
       from: 'Briswell <onboarding@resend.dev>',
       to: [payload.email],
-      subject: 'Hello World',
-      html: `<strong>${payload.code}</strong>`,
+      subject: 'Code OTP',
+      react: <PlaidVerifyIdentityEmail validationCode={payload.code} />,
     });
   }
 }

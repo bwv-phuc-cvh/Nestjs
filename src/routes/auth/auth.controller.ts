@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ZodResponse } from 'nestjs-zod';
-import { LoginBodyDTO, RegisterBodyDTO, RegisterResDTO, SendOTPBodyDTO } from 'src/routes/auth/auth.dto';
+import { LoginBodyDTO, LoginResDTO, RegisterBodyDTO, RegisterResDTO, SendOTPBodyDTO } from 'src/routes/auth/auth.dto';
 import { AuthService } from 'src/routes/auth/auth.service';
 
 @Controller('auth')
@@ -19,6 +19,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @ZodResponse({ type: LoginResDTO })
   async login(@Body() body: LoginBodyDTO) {
     return await this.authService.login(body);
   }

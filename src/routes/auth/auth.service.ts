@@ -57,11 +57,18 @@ export class AuthService {
         phoneNumber,
         roleId: clientRoleId,
       });
+
+      await this.authRepository.deleteVerificationCode({
+        email,
+        code,
+        type: VerificationCodeType.REGISTER,
+      });
+
       return user;
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw new UnprocessableEntityException({
-          path: 'email',
+        throw new BadRequestException({
+          field: 'email',
           message: 'Email is already registered',
         });
       }
@@ -70,24 +77,23 @@ export class AuthService {
   }
 
   async login(body: LoginBodyType) {
-    const user = await this.prismaService.user.findUniqueOrThrow({
-      where: {
-        email: body.email,
-      },
+    const user = await this.sharedUserRepository.findUnique({
+      email: body.email,
     });
 
     if (!user) {
-      throw new UnauthorizedException('Account is not exist');
+      throw new BadRequestException({
+        field: 'email',
+        message: 'Account is not exist',
+      });
     }
 
     const isPasswordMatch = await this.hashingService.compare(body.password, user.password);
     if (!isPasswordMatch) {
-      throw new UnprocessableEntityException([
-        {
-          field: 'password',
-          error: 'Password is incorrect',
-        },
-      ]);
+      throw new BadRequestException({
+        field: 'password',
+        error: 'Password is incorrect',
+      });
     }
     const tokens = await this.generateTokens({ userId: user.id });
     return tokens;
