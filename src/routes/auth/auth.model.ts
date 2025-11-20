@@ -1,14 +1,32 @@
 import { VerificationCodeType } from 'generated/prisma';
 import { User } from 'src/shared/models/user.model';
-import z from 'zod';
+import z, { string } from 'zod';
 
 // model schema
 
-export const VerificationCode = z.object({
+export const VerificationCodeSchema = z.object({
   id: z.number(),
   email: z.string().email(),
   code: z.string().length(6),
   type: z.enum(VerificationCodeType),
+  expiresAt: z.date(),
+  createdAt: z.date(),
+});
+
+export const DeviceSchema = z.object({
+  id: z.number(),
+  userId: z.number(),
+  userAgent: z.string(),
+  ip: z.string(),
+  lastActive: z.date(),
+  createdAt: z.date(),
+  isActive: z.boolean(),
+});
+
+export const RefreshToken = z.object({
+  token: z.string(),
+  userId: z.number(),
+  deviceId: z.number(),
   expiresAt: z.date(),
   createdAt: z.date(),
 });
@@ -52,15 +70,19 @@ export const LoginResSchema = z
   })
   .strict();
 
-export const SendOTPBodySchema = VerificationCode.pick({
+export const SendOTPBodySchema = VerificationCodeSchema.pick({
   email: true,
   type: true,
 }).strict();
 
 // Type Schema
+export type VerificationType = z.infer<typeof VerificationCodeSchema>;
+export type DeviceType = z.infer<typeof DeviceSchema>;
+export type RefreshTokenType = z.infer<typeof RefreshToken>;
+
+// Type Body
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>;
 export type LoginBodyType = z.infer<typeof LoginBodySchema>;
-export type VerificationType = z.infer<typeof VerificationCode>;
 export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>;
 
 // Type Response

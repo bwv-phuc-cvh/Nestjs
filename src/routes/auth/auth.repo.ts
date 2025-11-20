@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { RegisterBodyType, VerificationType } from './auth.model';
+import { DeviceType, RefreshTokenType, RegisterBodyType, VerificationType } from './auth.model';
 import { UserType } from 'src/shared/models/user.model';
 import { VerificationCodeType } from 'generated/prisma';
+import { AccessTokenPayloadCreate } from 'src/shared/types/jwt.type';
 
 @Injectable()
 export class AuthRepository {
@@ -56,6 +57,41 @@ export class AuthRepository {
           type,
         },
         code,
+      },
+    });
+  }
+
+  async createRefreshToken(payload: Omit<RefreshTokenType, 'expiresAt' | 'createdAt'> & { expiresAt: number }) {
+    const { deviceId, expiresAt: exp, token, userId } = payload;
+
+    return this.prismaService.refreshToken.create({
+      data: {
+        token,
+        userId,
+        expiresAt: new Date(exp * 1000),
+        deviceId,
+      },
+    });
+  }
+
+  async createDevice(
+    data: Pick<DeviceType, 'userId' | 'userAgent' | 'ip'> & Partial<Pick<DeviceType, 'lastActive' | 'isActive'>>,
+  ) {
+    return this.prismaService.device.create({
+      data,
+    });
+  }
+
+  async findUniqueUserIncludeRole(uniqueObject: { email: string } | { id: number }) {
+    return this.prismaService.user.findUnique({
+      where: uniqueObject,
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }
