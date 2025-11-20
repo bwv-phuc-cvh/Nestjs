@@ -45,6 +45,11 @@ export const LoginBodySchema = User.pick({
   password: true,
 }).strict();
 
+export const LoginResSchema = z.object({
+  accessToken:z.string(),
+  refreshToken:z.string()
+}).strict()
+
 export const SendOTPBodySchema = VerificationCode.pick({
   email: true,
   type: true,
@@ -58,3 +63,4 @@ export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>;
 
 // Type Response
 export type RegisterResType = z.infer<typeof RegisterResSchema>;
+export type LoginResType = z.infer<typeof LoginResSchema>
