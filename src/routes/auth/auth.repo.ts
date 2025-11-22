@@ -95,4 +95,41 @@ export class AuthRepository {
       },
     });
   }
+
+  async findUniqueRefreshTokenIncludeUserRole(uniqueObject: { token: string }) {
+    return this.prismaService.refreshToken.findUnique({
+      where: uniqueObject,
+      include: {
+        user: {
+          include: {
+            role: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async updateDevice(deviceId: number, data: Partial<DeviceType>) {
+    return this.prismaService.device.update({
+      where: { id: deviceId },
+      data,
+    });
+  }
+
+  async deleteRefreshToken(uniqueObject: { token: string }) {
+    return this.prismaService.refreshToken.delete({
+      where: uniqueObject,
+    });
+  }
+
+  async findFirstDevice(uniqueObject: Partial<DeviceType>) {
+    return this.prismaService.device.findFirst({
+      where: uniqueObject,
+    });
+  }
 }

@@ -23,7 +23,7 @@ export const DeviceSchema = z.object({
   isActive: z.boolean(),
 });
 
-export const RefreshToken = z.object({
+export const RefreshTokenSchema = z.object({
   token: z.string(),
   userId: z.number(),
   deviceId: z.number(),
@@ -75,15 +75,25 @@ export const SendOTPBodySchema = VerificationCodeSchema.pick({
   type: true,
 }).strict();
 
+export const RefreshTokenBodySchema = z
+  .object({
+    refreshToken: z.string(),
+  })
+  .strict();
+
+export const LogoutBodySchema = RefreshTokenBodySchema.strict();
+
 // Type Schema
 export type VerificationType = z.infer<typeof VerificationCodeSchema>;
 export type DeviceType = z.infer<typeof DeviceSchema>;
-export type RefreshTokenType = z.infer<typeof RefreshToken>;
+export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>;
 
 // Type Body
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>;
 export type LoginBodyType = z.infer<typeof LoginBodySchema>;
 export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>;
+export type RefreshTokenBodyType = z.infer<typeof RefreshTokenBodySchema>;
+export type LogoutBodyType = z.infer<typeof LogoutBodySchema>;
 
 // Type Response
 export type RegisterResType = z.infer<typeof RegisterResSchema>;

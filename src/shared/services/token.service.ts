@@ -14,7 +14,7 @@ export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
   signAccessToken(payload: AccessTokenPayloadCreate) {
-    return this.jwtService.sign(
+    return this.jwtService.signAsync(
       { ...payload, uuid: uuidv4() },
       {
         algorithm: 'HS256',
@@ -25,7 +25,7 @@ export class TokenService {
   }
 
   signRefreshToken(payload: RefreshTokenPayloadCreate) {
-    return this.jwtService.sign(
+    return this.jwtService.signAsync(
       { ...payload, uuid: uuidv4() },
       {
         algorithm: 'HS256',
