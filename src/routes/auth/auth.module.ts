@@ -4,9 +4,10 @@ import { AuthController } from './auth.controller';
 import { RoleService } from './role.service';
 import { AuthRepository } from './auth.repo';
 import { EmailService } from 'src/shared/services/email.service';
+import { GoogleService } from './google.service';
 
 @Module({
-  providers: [AuthService, RoleService, AuthRepository, EmailService],
+  providers: [AuthService, RoleService, AuthRepository, EmailService, GoogleService],
   controllers: [AuthController],
 })
 export class AuthModule {}

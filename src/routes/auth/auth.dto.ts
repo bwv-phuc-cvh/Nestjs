@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import {
+  GoogleAuthUrlSchema,
   LoginBodySchema,
   LoginResSchema,
   LogoutBodySchema,
@@ -16,3 +17,4 @@ export class LoginResDTO extends createZodDto(LoginResSchema) {}
 export class SendOTPBodyDTO extends createZodDto(SendOTPBodySchema) {}
 export class RefreshTokenBodyDTO extends createZodDto(RefreshTokenBodySchema) {}
 export class LogoutResDTO extends createZodDto(LogoutBodySchema) {}
+export class GoogleAuthUrlDTO extends createZodDto(GoogleAuthUrlSchema) {}

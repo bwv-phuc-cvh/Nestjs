@@ -9,9 +9,25 @@ import { AccessTokenPayloadCreate } from 'src/shared/types/jwt.type';
 export class AuthRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createUser(user: Omit<RegisterBodyType, 'confirmPassword' | 'code'> & Pick<UserType, 'roleId'>) {
+  async createUser(user: Omit<RegisterBodyType, 'confirmPassword' | 'code'> & Pick<UserType, 'roleId' | 'avatar'>) {
     return this.prismaService.user.create({
       data: user,
+    });
+  }
+
+  async createUserIncludeRole(
+    user: Omit<RegisterBodyType, 'confirmPassword' | 'code'> & Pick<UserType, 'roleId' | 'avatar'>,
+  ) {
+    return this.prismaService.user.create({
+      data: user,
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
   }
 

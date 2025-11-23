@@ -63,6 +63,7 @@ export class AuthService {
         name,
         phoneNumber,
         roleId: clientRoleId,
+        avatar: null,
       });
 
       await this.authRepository.deleteVerificationCode({
@@ -108,7 +109,6 @@ export class AuthService {
       ip: body.ip,
       userAgent: body.userAgent,
     });
-
     let deviceId: number;
 
     if (existingDevice) {
