@@ -15,11 +15,32 @@ export class AuthRepository {
     });
   }
 
+  async updateUser(userId: number, data: Partial<UserType>) {
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+
   async createUserIncludeRole(
     user: Omit<RegisterBodyType, 'confirmPassword' | 'code'> & Pick<UserType, 'roleId' | 'avatar'>,
   ) {
     return this.prismaService.user.create({
       data: user,
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findUniqueUserIncludeRole(uniqueObject: { email: string } | { id: number }) {
+    return this.prismaService.user.findUnique({
+      where: uniqueObject,
       include: {
         role: {
           select: {
@@ -90,25 +111,9 @@ export class AuthRepository {
     });
   }
 
-  async createDevice(
-    data: Pick<DeviceType, 'userId' | 'userAgent' | 'ip'> & Partial<Pick<DeviceType, 'lastActive' | 'isActive'>>,
-  ) {
-    return this.prismaService.device.create({
-      data,
-    });
-  }
-
-  async findUniqueUserIncludeRole(uniqueObject: { email: string } | { id: number }) {
-    return this.prismaService.user.findUnique({
+  async deleteRefreshToken(uniqueObject: { token: string }) {
+    return this.prismaService.refreshToken.delete({
       where: uniqueObject,
-      include: {
-        role: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
     });
   }
 
@@ -130,22 +135,30 @@ export class AuthRepository {
     });
   }
 
-  async updateDevice(deviceId: number, data: Partial<DeviceType>) {
-    return this.prismaService.device.update({
-      where: { id: deviceId },
-      data,
+  async findFirstRefreshToken(uniqueObject: Partial<RefreshTokenType>) {
+    return this.prismaService.refreshToken.findFirst({
+      where: uniqueObject,
     });
   }
 
-  async deleteRefreshToken(uniqueObject: { token: string }) {
-    return this.prismaService.refreshToken.delete({
-      where: uniqueObject,
+  async createDevice(
+    data: Pick<DeviceType, 'userId' | 'userAgent' | 'ip'> & Partial<Pick<DeviceType, 'lastActive' | 'isActive'>>,
+  ) {
+    return this.prismaService.device.create({
+      data,
     });
   }
 
   async findFirstDevice(uniqueObject: Partial<DeviceType>) {
     return this.prismaService.device.findFirst({
       where: uniqueObject,
+    });
+  }
+
+  async updateDevice(deviceId: number, data: Partial<DeviceType>) {
+    return this.prismaService.device.update({
+      where: { id: deviceId },
+      data,
     });
   }
 }

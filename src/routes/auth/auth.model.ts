@@ -1,6 +1,6 @@
 import { VerificationCodeType } from 'generated/prisma';
 import { User } from 'src/shared/models/user.model';
-import z, { string } from 'zod';
+import z from 'zod';
 
 // model schema
 
@@ -42,6 +42,25 @@ export const RegisterBodySchema = User.pick({
   password: true,
   name: true,
   phoneNumber: true,
+})
+  .extend({
+    confirmPassword: z.string().min(6).max(100),
+    code: z.string().length(6),
+  })
+  .strict()
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+      });
+    }
+  });
+
+export const ForgotPasswordBodySchema = User.pick({
+  email: true,
+  password: true,
 })
   .extend({
     confirmPassword: z.string().min(6).max(100),
@@ -103,6 +122,7 @@ export type LoginBodyType = z.infer<typeof LoginBodySchema>;
 export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>;
 export type RefreshTokenBodyType = z.infer<typeof RefreshTokenBodySchema>;
 export type LogoutBodyType = z.infer<typeof LogoutBodySchema>;
+export type ForgotPasswordBodyType = z.infer<typeof ForgotPasswordBodySchema>;
 
 // Type Response
 export type RegisterResType = z.infer<typeof RegisterResSchema>;

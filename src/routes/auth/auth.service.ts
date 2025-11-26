@@ -10,7 +10,14 @@ import { HashingService } from 'src/shared/services/hashing.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { TokenService } from 'src/shared/services/token.service';
 import { RoleService } from './role.service';
-import { DeviceType, LoginBodyType, RefreshTokenBodyType, RegisterBodyType, SendOTPBodyType } from './auth.model';
+import {
+  DeviceType,
+  ForgotPasswordBodyType,
+  LoginBodyType,
+  RefreshTokenBodyType,
+  RegisterBodyType,
+  SendOTPBodyType,
+} from './auth.model';
 import { AuthRepository } from './auth.repo';
 import { SharedUserRepository } from 'src/shared/repositories/shared-user.repo';
 import { addMilliseconds } from 'date-fns';
@@ -19,6 +26,16 @@ import ms, { StringValue } from 'ms';
 import { VerificationCodeType } from 'generated/prisma';
 import { EmailService } from 'src/shared/services/email.service';
 import { AccessTokenPayloadCreate } from 'src/shared/types/jwt.type';
+import {
+  EmailAlreadyRegisteredException,
+  ExpiredOTPException,
+  InvalidEmailException,
+  InvalidOTPException,
+  InvalidPasswordException,
+  OTPSendFailedException,
+  RefreshTokenHasBeenRevokedException,
+  RefreshTokenNotFoundException,
+} from './error.model';
 
 @Injectable()
 export class AuthService {
@@ -31,54 +48,53 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly sharedUserRepository: SharedUserRepository,
   ) {}
+  private async checkValidOTP({ email, code, type }: { email: string; code: string; type: VerificationCodeType }) {
+    const verificationCode = await this.authRepository.findUniqueVerificationCode({
+      email,
+      code,
+      type,
+    });
+
+    if (!verificationCode) {
+      throw InvalidOTPException;
+    }
+
+    if (verificationCode.expiresAt < new Date()) {
+      throw ExpiredOTPException;
+    }
+
+    return verificationCode;
+  }
+
   async register(body: RegisterBodyType) {
     const { email, code, name, password, phoneNumber } = body;
 
     try {
-      const verificationCode = await this.authRepository.findUniqueVerificationCode({
-        email,
-        code,
-        type: VerificationCodeType.REGISTER,
-      });
-
-      if (!verificationCode) {
-        throw new BadRequestException({
-          field: 'code',
-          message: 'Invalid OTP code',
-        });
-      }
-
-      if (verificationCode.expiresAt < new Date()) {
-        throw new BadRequestException({
-          field: 'expiresAt',
-          message: 'OTP code has expired',
-        });
-      }
+      await this.checkValidOTP({ email, code, type: VerificationCodeType.REGISTER });
 
       const clientRoleId = await this.roleService.getClientRoleId();
       const hashedPassword = await this.hashingService.hash(password);
-      const user = await this.authRepository.createUser({
-        email,
-        password: hashedPassword,
-        name,
-        phoneNumber,
-        roleId: clientRoleId,
-        avatar: null,
-      });
 
-      await this.authRepository.deleteVerificationCode({
-        email,
-        code,
-        type: VerificationCodeType.REGISTER,
-      });
+      const [user] = await Promise.all([
+        this.authRepository.createUser({
+          email,
+          password: hashedPassword,
+          name,
+          phoneNumber,
+          roleId: clientRoleId,
+          avatar: null,
+        }),
+        this.authRepository.deleteVerificationCode({
+          email,
+          code,
+          type: VerificationCodeType.REGISTER,
+        }),
+      ]);
 
       return user;
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw new BadRequestException({
-          field: 'email',
-          message: 'Email is already registered',
-        });
+        throw EmailAlreadyRegisteredException;
       }
       throw error;
     }
@@ -90,18 +106,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException({
-        field: 'email',
-        message: 'Account is not exist',
-      });
+      throw InvalidEmailException;
     }
 
     const isPasswordMatch = await this.hashingService.compare(body.password, user.password);
     if (!isPasswordMatch) {
-      throw new BadRequestException({
-        field: 'password',
-        error: 'Password is incorrect',
-      });
+      throw InvalidPasswordException;
     }
 
     const existingDevice = await this.authRepository.findFirstDevice({
@@ -128,12 +138,26 @@ export class AuthService {
       deviceId = id;
     }
 
+    const refreshTokenRecord = await this.authRepository.findFirstRefreshToken({
+      userId: user.id,
+      deviceId,
+    });
+
+    if (refreshTokenRecord && refreshTokenRecord.expiresAt > new Date()) {
+      throw new BadRequestException('Existing active session found. Please logout first.');
+    }
+
+    if (refreshTokenRecord) {
+      await this.authRepository.deleteRefreshToken({ token: refreshTokenRecord.token });
+    }
+
     const tokens = await this.generateTokens({
       userId: user.id,
       deviceId,
       roleId: user.role.id,
       roleName: user.role.name,
     });
+
     return tokens;
   }
 
@@ -174,7 +198,7 @@ export class AuthService {
       });
 
       if (!refreshTokenRecord) {
-        throw new UnauthorizedException('Refresh token has been used');
+        throw RefreshTokenNotFoundException;
       }
 
       const { deviceId, user, userId } = refreshTokenRecord;
@@ -219,7 +243,7 @@ export class AuthService {
       return { message: 'Logout successfully' };
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
-        throw new UnauthorizedException('Refresh token has been revoked');
+        throw RefreshTokenHasBeenRevokedException;
       }
       throw new UnauthorizedException();
     }
@@ -228,11 +252,12 @@ export class AuthService {
   async sendOTP(body: SendOTPBodyType) {
     const user = await this.sharedUserRepository.findUnique({ email: body.email });
 
-    if (user) {
-      throw new BadRequestException({
-        field: 'email',
-        message: 'Email is already registered',
-      });
+    if (body.type === VerificationCodeType.REGISTER && user) {
+      throw EmailAlreadyRegisteredException;
+    }
+
+    if (body.type === VerificationCodeType.FORGOT_PASSWORD && !user) {
+      throw InvalidEmailException;
     }
 
     const code = generateOTP(6);
@@ -247,12 +272,38 @@ export class AuthService {
     const { error } = await this.emailService.sendOTP({ email: body.email, code });
 
     if (error) {
-      throw new BadRequestException({
-        field: 'code',
-        message: 'OTP code sending failed',
-      });
+      throw OTPSendFailedException;
     }
 
     return { message: 'OTP code sent successfully' };
+  }
+
+  async forgotPassword(body: ForgotPasswordBodyType) {
+    const { email, password, code } = body;
+
+    const user = await this.authRepository.findUniqueUserIncludeRole({
+      email,
+    });
+
+    if (!user) {
+      throw InvalidEmailException;
+    }
+
+    await this.checkValidOTP({ email, code, type: VerificationCodeType.FORGOT_PASSWORD });
+
+    const hashedPassword = await this.hashingService.hash(password);
+
+    await Promise.all([
+      this.authRepository.updateUser(user.id, {
+        password: hashedPassword,
+      }),
+      this.authRepository.deleteVerificationCode({
+        email,
+        code,
+        type: VerificationCodeType.FORGOT_PASSWORD,
+      }),
+    ]);
+
+    return { message: 'Password has been reset successfully' };
   }
 }

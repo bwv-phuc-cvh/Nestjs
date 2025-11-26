@@ -9,6 +9,7 @@ import { HashingService } from 'src/shared/services/hashing.service';
 import { AuthRepository } from './auth.repo';
 import { v4 as uuidv4 } from 'uuid';
 import { Device } from 'generated/prisma';
+import { InvalidGoogleTokenException } from './error.model';
 
 @Injectable()
 export class GoogleService {
@@ -60,10 +61,10 @@ export class GoogleService {
     const payload = ticket.getPayload();
 
     if (!payload) {
-      throw new UnauthorizedException('Invalid Google Token');
+      throw InvalidGoogleTokenException;
     }
 
-    const { email, name, picture } = payload as TokenPayload & { userAgent: string; ip: string };
+    const { email, name, picture } = payload as TokenPayload;
 
     let stateDecoded: GoogleAuthStateType | null;
     try {

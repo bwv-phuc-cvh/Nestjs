@@ -9,6 +9,7 @@ import {
   RefreshTokenBodyDTO,
   LogoutResDTO,
   GoogleAuthUrlDTO,
+  ForgotPasswordBodyDTO,
 } from 'src/routes/auth/auth.dto';
 import { AuthService } from 'src/routes/auth/auth.service';
 import { DeviceType } from './auth.model';
@@ -30,13 +31,13 @@ export class AuthController {
   @AuthPublic()
   @ZodResponse({ type: RegisterResDTO })
   async register(@Body() body: RegisterBodyDTO) {
-    return await this.authService.register(body);
+    return this.authService.register(body);
   }
 
   @Post('otp')
   @AuthPublic()
   async sendOTP(@Body() body: SendOTPBodyDTO) {
-    return await this.authService.sendOTP(body);
+    return this.authService.sendOTP(body);
   }
 
   @Post('login')
@@ -47,7 +48,7 @@ export class AuthController {
     @UserAgent() userAgent: string,
     @Ip() ip: string,
   ) {
-    return await this.authService.login({
+    return this.authService.login({
       ...body,
       userAgent,
       ip,
@@ -57,7 +58,7 @@ export class AuthController {
   @Post('refresh-token')
   @AuthPublic()
   async refreshToken(@Body() body: RefreshTokenBodyDTO, @UserAgent() userAgent: string, @Ip() ip: string) {
-    return await this.authService.refreshToken({
+    return this.authService.refreshToken({
       refreshToken: body.refreshToken,
       userAgent,
       ip,
@@ -67,7 +68,7 @@ export class AuthController {
   @Post('logout')
   @ZodResponse({ type: MessageResDTO, status: HttpStatus.OK })
   async logout(@Body() body: LogoutResDTO) {
-    return await this.authService.logout(body.refreshToken);
+    return this.authService.logout(body.refreshToken);
   }
 
   @Get('google-link')
@@ -92,5 +93,11 @@ export class AuthController {
     } catch (error) {
       return res.redirect(`${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?error=Authentication%20Failed`);
     }
+  }
+
+  @Post('forgot-password')
+  @AuthPublic()
+  async forgotPassword(@Body() body: ForgotPasswordBodyDTO) {
+    return this.authService.forgotPassword(body);
   }
 }
