@@ -44,3 +44,23 @@ export const InvalidGoogleTokenException = new BadRequestException({
   field: 'googleToken',
   message: 'Invalid Google token',
 });
+
+export const TOTPAlreadyEnableException = new BadRequestException({
+  field: 'totpCode',
+  message: '2FA is enabled',
+});
+
+export const TOTPNotEnableException = new BadRequestException({
+  field: 'totpCode',
+  message: '2FA is not enabled',
+});
+
+export const InvalidTOTPAndCodeException = new BadRequestException({
+  field: 'totpCode',
+  message: 'Invalid 2FA and OTP code',
+});
+
+export const InvalidTOTPException = new BadRequestException({
+  field: 'totpCode',
+  message: 'Invalid TOTP code',
+});

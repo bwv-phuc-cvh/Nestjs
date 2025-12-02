@@ -10,6 +10,7 @@ import {
   LogoutResDTO,
   GoogleAuthUrlDTO,
   ForgotPasswordBodyDTO,
+  TwoFactorSetupResDTO,
 } from 'src/routes/auth/auth.dto';
 import { AuthService } from 'src/routes/auth/auth.service';
 import { DeviceType } from './auth.model';
@@ -19,6 +20,8 @@ import { AuthPublic } from 'src/shared/decorators/auth.decorator';
 import { GoogleService } from './google.service';
 import type { Response } from 'express';
 import envConfig from 'src/shared/config';
+import { EmptyBodyDTO } from 'src/shared/dtos/request.dto';
+import { ActiveUser } from 'src/shared/decorators/active-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -99,5 +102,17 @@ export class AuthController {
   @AuthPublic()
   async forgotPassword(@Body() body: ForgotPasswordBodyDTO) {
     return this.authService.forgotPassword(body);
+  }
+
+  @Post('2fa/setup')
+  @ZodResponse({ type: TwoFactorSetupResDTO })
+  setupTwoFactorAuth(@Body() _: EmptyBodyDTO, @ActiveUser('userId') userId: number) {
+    return this.authService.setupTwoFactorAuth(userId);
+  }
+
+  @Post('2fa/disable')
+  @ZodResponse({ type: MessageResDTO })
+  disablepTwoFactorAuth(@Body() _: EmptyBodyDTO, @ActiveUser('userId') userId: number) {
+    return this.authService.disablepTwoFactorAuth({ userId });
   }
 }

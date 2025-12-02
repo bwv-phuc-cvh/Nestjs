@@ -3,7 +3,6 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { DeviceType, RefreshTokenType, RegisterBodyType, VerificationType } from './auth.model';
 import { UserType } from 'src/shared/models/user.model';
 import { VerificationCodeType } from 'generated/prisma';
-import { AccessTokenPayloadCreate } from 'src/shared/types/jwt.type';
 
 @Injectable()
 export class AuthRepository {

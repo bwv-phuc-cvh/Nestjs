@@ -80,7 +80,12 @@ export const ForgotPasswordBodySchema = User.pick({
 export const LoginBodySchema = User.pick({
   email: true,
   password: true,
-}).strict();
+})
+  .extend({
+    code: z.string().length(6),
+    totpCode: z.string(),
+  })
+  .strict();
 
 export const LoginResSchema = z
   .object({
@@ -110,6 +115,18 @@ export const GoogleAuthUrlSchema = z.object({
   url: z.string().url(),
 });
 
+export const TwoFactorSetupResSchema = z.object({
+  secret: z.string(),
+  uri: z.string(),
+});
+
+export const DisableTwoFactorBodySchema = z
+  .object({
+    totpCode: z.string().length(6).optional(),
+    code: z.string().length(6).optional(),
+  })
+  .strict();
+
 // Type Schema
 export type VerificationType = z.infer<typeof VerificationCodeSchema>;
 export type DeviceType = z.infer<typeof DeviceSchema>;
@@ -123,6 +140,7 @@ export type SendOTPBodyType = z.infer<typeof SendOTPBodySchema>;
 export type RefreshTokenBodyType = z.infer<typeof RefreshTokenBodySchema>;
 export type LogoutBodyType = z.infer<typeof LogoutBodySchema>;
 export type ForgotPasswordBodyType = z.infer<typeof ForgotPasswordBodySchema>;
+export type DisableTwoFactorBodyType = z.infer<typeof DisableTwoFactorBodySchema>;
 
 // Type Response
 export type RegisterResType = z.infer<typeof RegisterResSchema>;

@@ -12,6 +12,7 @@ import { TokenService } from 'src/shared/services/token.service';
 import { RoleService } from './role.service';
 import {
   DeviceType,
+  DisableTwoFactorBodyType,
   ForgotPasswordBodyType,
   LoginBodyType,
   RefreshTokenBodyType,
@@ -32,10 +33,15 @@ import {
   InvalidEmailException,
   InvalidOTPException,
   InvalidPasswordException,
+  InvalidTOTPAndCodeException,
+  InvalidTOTPException,
   OTPSendFailedException,
   RefreshTokenHasBeenRevokedException,
   RefreshTokenNotFoundException,
+  TOTPAlreadyEnableException,
+  TOTPNotEnableException,
 } from './error.model';
+import { TwoFactorAuthService } from 'src/shared/services/2fa.service';
 
 @Injectable()
 export class AuthService {
@@ -47,6 +53,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly authRepository: AuthRepository,
     private readonly sharedUserRepository: SharedUserRepository,
+    private readonly twoFactorService: TwoFactorAuthService,
   ) {}
   private async checkValidOTP({ email, code, type }: { email: string; code: string; type: VerificationCodeType }) {
     const verificationCode = await this.authRepository.findUniqueVerificationCode({
@@ -114,6 +121,26 @@ export class AuthService {
       throw InvalidPasswordException;
     }
 
+    // 2. If the user has enabled 2FA, check if the TOTP or OTP code is valid.
+
+    if (user.totpSecret) {
+      if (!body.totpCode && !body.code) throw InvalidTOTPAndCodeException;
+
+      if (body.totpCode) {
+        const isValid = this.twoFactorService.verifyTOTP({
+          email: user.email,
+          secret: user.totpSecret,
+          token: body.totpCode,
+        });
+
+        if (!isValid) throw InvalidTOTPException;
+      }
+
+      if (!body.totpCode && body.code) {
+        await this.checkValidOTP({ email: user.email, code: body.code, type: VerificationCodeType.LOGIN });
+      }
+    }
+
     const existingDevice = await this.authRepository.findFirstDevice({
       userId: user.id,
       ip: body.ip,
@@ -149,6 +176,14 @@ export class AuthService {
 
     if (refreshTokenRecord) {
       await this.authRepository.deleteRefreshToken({ token: refreshTokenRecord.token });
+    }
+
+    if (body.code) {
+      await this.authRepository.deleteVerificationCode({
+        email: user.email,
+        code: body.code,
+        type: VerificationCodeType.LOGIN,
+      });
     }
 
     const tokens = await this.generateTokens({
@@ -305,5 +340,63 @@ export class AuthService {
     ]);
 
     return { message: 'Password has been reset successfully' };
+  }
+
+  async setupTwoFactorAuth(userId: number) {
+    // 1. Check if user has enabled 2FA
+    const user = await this.sharedUserRepository.findUnique({
+      id: userId,
+    });
+
+    if (!user) {
+      throw InvalidEmailException;
+    }
+
+    if (user.totpSecret) {
+      throw TOTPAlreadyEnableException;
+    }
+
+    // 2. create secret and uri
+    const { secret, uri } = this.twoFactorService.generateTOTPSecret(user.email);
+
+    // 3. update secret for user
+    await this.authRepository.updateUser(user.id, { totpSecret: secret });
+
+    return {
+      secret,
+      uri,
+    };
+  }
+
+  async disablepTwoFactorAuth(data: DisableTwoFactorBodyType & { userId: number }) {
+    const { userId, code, totpCode } = data;
+
+    const user = await this.sharedUserRepository.findUnique({ id: userId });
+
+    if (!user) throw InvalidEmailException;
+
+    if (!user.totpSecret) {
+      throw TOTPNotEnableException;
+    }
+
+    if (totpCode) {
+      const isValid = this.twoFactorService.verifyTOTP({
+        email: user.email,
+        secret: user.totpSecret,
+        token: totpCode,
+      });
+
+      if (!isValid) throw InvalidTOTPException;
+    }
+
+    if (!totpCode && code) {
+      await this.checkValidOTP({ email: user.email, code, type: VerificationCodeType.DISABLE_2FA });
+    }
+
+    await this.authRepository.updateUser(user.id, { totpSecret: null });
+
+    return {
+      message: '2FA disabled successfully',
+    };
   }
 }
