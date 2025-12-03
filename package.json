@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:migration": "npx prisma generate && npx prisma migrate dev --name init",
     "init-seed-data": "ts-node -r tsconfig-paths/register initialScript/index.ts",
-    "create-permission": "ts-node -r initialScript/create-permission.ts",
+    "create-permission": "ts-node -r tsconfig-paths/register initialScript/create-permission.ts",
     "email:dev": "email dev",
     "email:build": "email build",
     "email:export": "email export"

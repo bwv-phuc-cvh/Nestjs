@@ -6,7 +6,7 @@ import { config } from 'dotenv';
 config({
   path: '.env',
 });
-// Kiểm tra coi thử có file .env hay chưa
+
 if (!fs.existsSync(path.resolve('.env'))) {
   console.log('Không tìm thấy file .env');
   process.exit(1);

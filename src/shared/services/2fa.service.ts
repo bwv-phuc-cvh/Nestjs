@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as OTPAuth from 'otpauth';
-import envConfig from '../config.js';
+import envConfig from '../config';
 
 @Injectable()
 export class TwoFactorAuthService {

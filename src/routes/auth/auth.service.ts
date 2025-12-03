@@ -1,15 +1,8 @@
-import {
-  BadRequestException,
-  HttpException,
-  Injectable,
-  UnauthorizedException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { generateOTP, isNotFoundPrismaError, isUniqueConstraintPrismaError } from 'src/shared/helpers';
 import { HashingService } from 'src/shared/services/hashing.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { TokenService } from 'src/shared/services/token.service';
-import { RoleService } from './role.service';
 import {
   DeviceType,
   DisableTwoFactorBodyType,
@@ -42,6 +35,7 @@ import {
   TOTPNotEnableException,
 } from './error.model';
 import { TwoFactorAuthService } from 'src/shared/services/2fa.service';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class AuthService {

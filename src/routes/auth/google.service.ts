@@ -4,12 +4,12 @@ import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { google } from 'googleapis';
 import { GoogleAuthStateType } from './auth.model';
 import { AuthService } from './auth.service';
-import { RoleService } from './role.service';
 import { HashingService } from 'src/shared/services/hashing.service';
 import { AuthRepository } from './auth.repo';
 import { v4 as uuidv4 } from 'uuid';
 import { Device } from 'generated/prisma';
 import { InvalidGoogleTokenException } from './error.model';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class GoogleService {
