@@ -9,8 +9,16 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from 'src/shared/guards/authentication.guard';
 import { SharedUserRepository } from './repositories/shared-user.repo';
 import { TwoFactorAuthService } from './services/2fa.service';
+import { SharedRoleRepository } from './repositories/shared-role.repo';
 
-const sharedServices = [PrismaService, HashingService, TokenService, TwoFactorAuthService, SharedUserRepository];
+const sharedServices = [
+  PrismaService,
+  HashingService,
+  TokenService,
+  TwoFactorAuthService,
+  SharedUserRepository,
+  SharedRoleRepository,
+];
 
 @Global()
 @Module({

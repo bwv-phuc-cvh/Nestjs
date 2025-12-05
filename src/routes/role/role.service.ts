@@ -10,21 +10,6 @@ import { Role } from 'generated/prisma';
 export class RoleService {
   constructor(private roleRepo: RoleRepo) {}
 
-  private clientRoleId: number | null = null;
-
-  async getClientRoleId() {
-    if (this.clientRoleId) {
-      return this.clientRoleId;
-    }
-
-    const clientRole = (await this.roleRepo.findOne({
-      name: RoleName.Client,
-    })) as Role;
-
-    this.clientRoleId = clientRole.id;
-    return this.clientRoleId;
-  }
-
   async list(pagination: GetRolesQueryType) {
     const data = await this.roleRepo.list(pagination);
     return data;

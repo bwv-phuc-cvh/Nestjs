@@ -36,6 +36,7 @@ import {
 } from './error.model';
 import { TwoFactorAuthService } from 'src/shared/services/2fa.service';
 import { RoleService } from '../role/role.service';
+import { SharedRoleRepository } from 'src/shared/repositories/shared-role.repo';
 
 @Injectable()
 export class AuthService {
@@ -45,9 +46,10 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly roleService: RoleService,
     private readonly emailService: EmailService,
+    private readonly twoFactorService: TwoFactorAuthService,
     private readonly authRepository: AuthRepository,
     private readonly sharedUserRepository: SharedUserRepository,
-    private readonly twoFactorService: TwoFactorAuthService,
+    private readonly sharedRoleRepository: SharedRoleRepository,
   ) {}
   private async checkValidOTP({ email, code, type }: { email: string; code: string; type: VerificationCodeType }) {
     const verificationCode = await this.authRepository.findUniqueVerificationCode({
@@ -73,7 +75,7 @@ export class AuthService {
     try {
       await this.checkValidOTP({ email, code, type: VerificationCodeType.REGISTER });
 
-      const clientRoleId = await this.roleService.getClientRoleId();
+      const clientRoleId = await this.sharedRoleRepository.getClientRoleId();
       const hashedPassword = await this.hashingService.hash(password);
 
       const [user] = await Promise.all([

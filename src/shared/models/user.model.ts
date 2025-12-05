@@ -1,5 +1,7 @@
 import { UserStatus } from 'generated/prisma';
 import z from 'zod';
+import { PermissionSchema } from './permission.model';
+import { RoleSchema } from './role.model';
 
 export const User = z.object({
   id: z.number(),
@@ -20,3 +22,33 @@ export const User = z.object({
 });
 
 export type UserType = z.infer<typeof User>;
+
+const PermissionResSchema = PermissionSchema.pick({
+  id: true,
+  name: true,
+  module: true,
+  path: true,
+  method: true,
+});
+
+const RoleResSchema = RoleSchema.pick({
+  id: true,
+  name: true,
+}).extend({
+  permissions: z.array(PermissionResSchema),
+});
+
+export const ProfileResponseSchema = User.omit({
+  password: true,
+  totpSecret: true,
+}).extend({
+  role: RoleResSchema,
+});
+
+export const UpdateProfileResSchema = User.omit({
+  password: true,
+  totpSecret: true,
+});
+
+export type GetUserProfileResType = z.infer<typeof ProfileResponseSchema>;
+export type UpdateProfileResType = z.infer<typeof UpdateProfileResSchema>;

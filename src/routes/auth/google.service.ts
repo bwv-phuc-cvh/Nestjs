@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Device } from 'generated/prisma';
 import { InvalidGoogleTokenException } from './error.model';
 import { RoleService } from '../role/role.service';
+import { SharedRoleRepository } from 'src/shared/repositories/shared-role.repo';
 
 @Injectable()
 export class GoogleService {
@@ -17,9 +18,10 @@ export class GoogleService {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly authRepository: AuthRepository,
     private readonly roleService: RoleService,
     private readonly hashingService: HashingService,
+    private readonly authRepository: AuthRepository,
+    private readonly sharedRoleRepository: SharedRoleRepository,
   ) {
     this.oauth2Client = new google.auth.OAuth2(
       envConfig.GOOGLE_CLIENT_ID,
@@ -78,7 +80,7 @@ export class GoogleService {
     });
 
     if (!user) {
-      const clientRoleId = await this.roleService.getClientRoleId();
+      const clientRoleId = await this.sharedRoleRepository.getClientRoleId();
       const randomPassword = uuidv4();
       const hashedPassword = await this.hashingService.hash(randomPassword);
       const userCreated = await this.authRepository.createUserIncludeRole({
