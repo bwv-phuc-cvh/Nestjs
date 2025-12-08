@@ -10,12 +10,14 @@ import { AuthenticationGuard } from 'src/shared/guards/authentication.guard';
 import { SharedUserRepository } from './repositories/shared-user.repo';
 import { TwoFactorAuthService } from './services/2fa.service';
 import { SharedRoleRepository } from './repositories/shared-role.repo';
+import { S3Service } from './services/s3.service';
 
 const sharedServices = [
   PrismaService,
   HashingService,
   TokenService,
   TwoFactorAuthService,
+  S3Service,
   SharedUserRepository,
   SharedRoleRepository,
 ];
