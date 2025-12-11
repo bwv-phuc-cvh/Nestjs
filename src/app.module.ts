@@ -12,9 +12,34 @@ import { RoleModule } from './routes/role/role.module';
 import { ProfileModule } from './routes/profile/profile.module';
 import { UserModule } from './routes/user/user.module';
 import { MediaModule } from './routes/media/media.module';
+import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import path from 'path';
+import { LanguageModule } from './routes/language/language.module';
+import { BrandModule } from './routes/brand/brand.module';
+import { BrandTranslationModule } from './routes/brand/brand-translation/brand-translation.module';
 
 @Module({
-  imports: [SharedModule, AuthModule, PermissionModule, RoleModule, ProfileModule, UserModule, MediaModule],
+  imports: [
+    SharedModule,
+    AuthModule,
+    PermissionModule,
+    RoleModule,
+    ProfileModule,
+    UserModule,
+    MediaModule,
+    LanguageModule,
+    BrandModule,
+    BrandTranslationModule,
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.resolve('src/i18n/'),
+        watch: true,
+      },
+      resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver],
+      typesOutputPath: path.resolve('src/generated/i18n.generated.ts'),
+    }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,
