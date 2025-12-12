@@ -1,5 +1,5 @@
-import { BrandTranslationSchema } from 'src/shared/models/shared-brand-translation.model'
-import { z } from 'zod'
+import { BrandTranslationSchema } from 'src/shared/models/brand-translation.model';
+import { z } from 'zod';
 
 export const BrandSchema = z.object({
   id: z.number(),
@@ -12,8 +12,8 @@ export const BrandSchema = z.object({
   deletedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-})
+});
 
 export const BrandIncludeTranslationSchema = BrandSchema.extend({
   brandTranslations: z.array(BrandTranslationSchema),
-})
+});

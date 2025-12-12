@@ -1,22 +1,22 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common';
 import {
   CreateBrandBodyType,
   GetBrandsResType,
   UpdateBrandBodyType,
   BrandType,
   BrandIncludeTranslationType,
-} from 'src/routes/brand/brand.model'
-import { ALL_LANGUAGE_CODE } from 'src/shared/constants/orther.constant'
-import { PaginationQueryType } from 'src/shared/models/request.model'
-import { PrismaService } from 'src/shared/services/prisma.service'
+} from 'src/routes/brand/brand.model';
+import { ALL_LANGUAGE_CODE } from 'src/shared/constants/orther.constant';
+import { PaginationQueryType } from 'src/shared/models/request.model';
+import { PrismaService } from 'src/shared/services/prisma.service';
 
 @Injectable()
 export class BrandRepo {
   constructor(private prismaService: PrismaService) {}
 
   async list(pagination: PaginationQueryType, languageId: string): Promise<GetBrandsResType> {
-    const skip = (pagination.page - 1) * pagination.limit
-    const take = pagination.limit
+    const skip = (pagination.page - 1) * pagination.limit;
+    const take = pagination.limit;
     const [totalItems, data] = await Promise.all([
       this.prismaService.brand.count({
         where: {
@@ -38,14 +38,14 @@ export class BrandRepo {
         skip,
         take,
       }),
-    ])
+    ]);
     return {
       data,
       totalItems,
       page: pagination.page,
       limit: pagination.limit,
       totalPages: Math.ceil(totalItems / pagination.limit),
-    } as any
+    } as any;
   }
 
   findById(id: number, languageId: string): Promise<BrandIncludeTranslationType | null> {
@@ -59,15 +59,15 @@ export class BrandRepo {
           where: languageId === ALL_LANGUAGE_CODE ? { deletedAt: null } : { deletedAt: null, languageId },
         },
       },
-    }) as any
+    }) as any;
   }
 
   create({
     createdById,
     data,
   }: {
-    createdById: number | null
-    data: CreateBrandBodyType
+    createdById: number | null;
+    data: CreateBrandBodyType;
   }): Promise<BrandIncludeTranslationType> {
     return this.prismaService.brand.create({
       data: {
@@ -79,7 +79,7 @@ export class BrandRepo {
           where: { deletedAt: null },
         },
       },
-    }) as any
+    }) as any;
   }
 
   update({
@@ -87,9 +87,9 @@ export class BrandRepo {
     updatedById,
     data,
   }: {
-    id: number
-    updatedById: number
-    data: UpdateBrandBodyType
+    id: number;
+    updatedById: number;
+    data: UpdateBrandBodyType;
   }): Promise<BrandIncludeTranslationType> {
     return this.prismaService.brand.update({
       where: {
@@ -105,7 +105,7 @@ export class BrandRepo {
           where: { deletedAt: null },
         },
       },
-    }) as any
+    }) as any;
   }
 
   delete(
@@ -113,8 +113,8 @@ export class BrandRepo {
       id,
       deletedById,
     }: {
-      id: number
-      deletedById: number
+      id: number;
+      deletedById: number;
     },
     isHard?: boolean,
   ): Promise<BrandType> {
@@ -135,6 +135,6 @@ export class BrandRepo {
               deletedById,
             },
           })
-    ) as any
+    ) as any;
   }
 }

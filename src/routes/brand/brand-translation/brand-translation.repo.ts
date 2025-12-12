@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common';
 import {
   GetBrandTranslationDetailResType,
   CreateBrandTranslationBodyType,
   BrandTranslationType,
   UpdateBrandTranslationBodyType,
-} from 'src/routes/brand/brand-translation/brand-translation.model'
-import { PrismaService } from 'src/shared/services/prisma.service'
+} from 'src/routes/brand/brand-translation/brand-translation.model';
+import { PrismaService } from 'src/shared/services/prisma.service';
 
 @Injectable()
 export class BrandTranslationRepo {
@@ -17,22 +17,22 @@ export class BrandTranslationRepo {
         id,
         deletedAt: null,
       },
-    }) as any
+    }) as any;
   }
 
   create({
     createdById,
     data,
   }: {
-    createdById: number | null
-    data: CreateBrandTranslationBodyType
+    createdById: number | null;
+    data: CreateBrandTranslationBodyType;
   }): Promise<BrandTranslationType> {
     return this.prismaService.brandTranslation.create({
       data: {
         ...data,
         createdById,
       },
-    }) as any
+    }) as any;
   }
 
   update({
@@ -40,9 +40,9 @@ export class BrandTranslationRepo {
     updatedById,
     data,
   }: {
-    id: number
-    updatedById: number
-    data: UpdateBrandTranslationBodyType
+    id: number;
+    updatedById: number;
+    data: UpdateBrandTranslationBodyType;
   }): Promise<BrandTranslationType> {
     return this.prismaService.brandTranslation.update({
       where: {
@@ -53,7 +53,7 @@ export class BrandTranslationRepo {
         ...data,
         updatedById,
       },
-    }) as any
+    }) as any;
   }
 
   delete(
@@ -61,8 +61,8 @@ export class BrandTranslationRepo {
       id,
       deletedById,
     }: {
-      id: number
-      deletedById: number
+      id: number;
+      deletedById: number;
     },
     isHard?: boolean,
   ): Promise<BrandTranslationType> {
@@ -83,6 +83,6 @@ export class BrandTranslationRepo {
               deletedById,
             },
           })
-    ) as any
+    ) as any;
   }
 }

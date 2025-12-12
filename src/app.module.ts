@@ -17,6 +17,8 @@ import path from 'path';
 import { LanguageModule } from './routes/language/language.module';
 import { BrandModule } from './routes/brand/brand.module';
 import { BrandTranslationModule } from './routes/brand/brand-translation/brand-translation.module';
+import { CategoryTranslationModule } from './routes/category/category-translation/category-translation.module';
+import { CategoryModule } from './routes/category/category.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { BrandTranslationModule } from './routes/brand/brand-translation/brand-t
     LanguageModule,
     BrandModule,
     BrandTranslationModule,
+    CategoryModule,
+    CategoryTranslationModule,
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {

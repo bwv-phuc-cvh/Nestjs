@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const BrandTranslationSchema = z.object({
   id: z.number(),
@@ -13,4 +13,4 @@ export const BrandTranslationSchema = z.object({
   deletedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
-})
+});

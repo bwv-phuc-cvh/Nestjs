@@ -1,11 +1,11 @@
-import { createZodDto } from 'nestjs-zod'
+import { createZodDto } from 'nestjs-zod';
 import {
   CreateBrandBodySchema,
   GetBrandDetailResSchema,
   GetBrandParamsSchema,
   GetBrandsResSchema,
   UpdateBrandBodySchema,
-} from 'src/routes/brand/brand.model'
+} from 'src/routes/brand/brand.model';
 
 export class GetBrandsResDTO extends createZodDto(GetBrandsResSchema) {}
 

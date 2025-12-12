@@ -1,14 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
-import { ZodResponse } from 'nestjs-zod'
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { ZodResponse } from 'nestjs-zod';
 import {
   CreateBrandTranslationBodyDTO,
   GetBrandTranslationDetailResDTO,
   GetBrandTranslationParamsDTO,
   UpdateBrandTranslationBodyDTO,
-} from 'src/routes/brand/brand-translation/brand-translation.dto'
-import { BrandTranslationService } from 'src/routes/brand/brand-translation/brand-translation.service'
-import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
-import { MessageResDTO } from 'src/shared/dtos/response.dto'
+} from 'src/routes/brand/brand-translation/brand-translation.dto';
+import { BrandTranslationService } from 'src/routes/brand/brand-translation/brand-translation.service';
+import { ActiveUser } from 'src/shared/decorators/active-user.decorator';
+import { MessageResDTO } from 'src/shared/dtos/response.dto';
 
 @Controller('brand-translations')
 export class BrandTranslationController {
@@ -17,7 +17,7 @@ export class BrandTranslationController {
   @Get(':brandTranslationId')
   @ZodResponse({ type: GetBrandTranslationDetailResDTO })
   findById(@Param() params: GetBrandTranslationParamsDTO) {
-    return this.brandTranslationService.findById(params.brandTranslationId)
+    return this.brandTranslationService.findById(params.brandTranslationId);
   }
 
   @Post()
@@ -26,7 +26,7 @@ export class BrandTranslationController {
     return this.brandTranslationService.create({
       data: body,
       createdById: userId,
-    })
+    });
   }
 
   @Put(':brandTranslationId')
@@ -40,7 +40,7 @@ export class BrandTranslationController {
       data: body,
       id: params.brandTranslationId,
       updatedById: userId,
-    })
+    });
   }
 
   @Delete(':brandTranslationId')
@@ -49,6 +49,6 @@ export class BrandTranslationController {
     return this.brandTranslationService.delete({
       id: params.brandTranslationId,
       deletedById: userId,
-    })
+    });
   }
 }

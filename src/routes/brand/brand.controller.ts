@@ -1,17 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common'
-import { ZodResponse } from 'nestjs-zod'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { ZodResponse } from 'nestjs-zod';
 import {
   CreateBrandBodyDTO,
   GetBrandDetailResDTO,
   GetBrandParamsDTO,
   GetBrandsResDTO,
   UpdateBrandBodyDTO,
-} from 'src/routes/brand/brand.dto'
-import { BrandService } from 'src/routes/brand/brand.service'
-import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
-import { AuthPublic } from 'src/shared/decorators/auth.decorator'
-import { PaginationQueryDTO } from 'src/shared/dtos/request.dto'
-import { MessageResDTO } from 'src/shared/dtos/response.dto'
+} from 'src/routes/brand/brand.dto';
+import { BrandService } from 'src/routes/brand/brand.service';
+import { ActiveUser } from 'src/shared/decorators/active-user.decorator';
+import { AuthPublic } from 'src/shared/decorators/auth.decorator';
+import { PaginationQueryDTO } from 'src/shared/dtos/request.dto';
+import { MessageResDTO } from 'src/shared/dtos/response.dto';
 
 @Controller('brands')
 export class BrandController {
@@ -21,14 +21,14 @@ export class BrandController {
   @AuthPublic()
   @ZodResponse({ type: GetBrandsResDTO })
   list(@Query() query: PaginationQueryDTO) {
-    return this.brandService.list(query)
+    return this.brandService.list(query);
   }
 
   @Get(':brandId')
   @AuthPublic()
   @ZodResponse({ type: GetBrandDetailResDTO })
   findById(@Param() params: GetBrandParamsDTO) {
-    return this.brandService.findById(params.brandId)
+    return this.brandService.findById(params.brandId);
   }
 
   @Post()
@@ -37,7 +37,7 @@ export class BrandController {
     return this.brandService.create({
       data: body,
       createdById: userId,
-    })
+    });
   }
 
   @Put(':brandId')
@@ -47,7 +47,7 @@ export class BrandController {
       data: body,
       id: params.brandId,
       updatedById: userId,
-    })
+    });
   }
 
   @Delete(':brandId')
@@ -56,6 +56,6 @@ export class BrandController {
     return this.brandService.delete({
       id: params.brandId,
       deletedById: userId,
-    })
+    });
   }
 }

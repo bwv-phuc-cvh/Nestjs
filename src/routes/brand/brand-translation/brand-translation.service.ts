@@ -1,23 +1,23 @@
-import { Injectable } from '@nestjs/common'
-import { NotFoundRecordException } from 'src/shared/error'
-import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from 'src/shared/helpers'
-import { BrandTranslationRepo } from 'src/routes/brand/brand-translation/brand-translation.repo'
-import { BrandTranslationAlreadyExistsException } from 'src/routes/brand/brand-translation/brand-translation.error'
+import { Injectable } from '@nestjs/common';
+import { NotFoundRecordException } from 'src/shared/error';
+import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from 'src/shared/helpers';
+import { BrandTranslationRepo } from 'src/routes/brand/brand-translation/brand-translation.repo';
+import { BrandTranslationAlreadyExistsException } from 'src/routes/brand/brand-translation/brand-translation.error';
 import {
   CreateBrandTranslationBodyType,
   UpdateBrandTranslationBodyType,
-} from 'src/routes/brand/brand-translation/brand-translation.model'
+} from 'src/routes/brand/brand-translation/brand-translation.model';
 
 @Injectable()
 export class BrandTranslationService {
   constructor(private brandTranslationRepo: BrandTranslationRepo) {}
 
   async findById(id: number) {
-    const brand = await this.brandTranslationRepo.findById(id)
+    const brand = await this.brandTranslationRepo.findById(id);
     if (!brand) {
-      throw NotFoundRecordException
+      throw NotFoundRecordException;
     }
-    return brand
+    return brand;
   }
 
   async create({ data, createdById }: { data: CreateBrandTranslationBodyType; createdById: number }) {
@@ -25,12 +25,12 @@ export class BrandTranslationService {
       return await this.brandTranslationRepo.create({
         createdById,
         data,
-      })
+      });
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw BrandTranslationAlreadyExistsException
+        throw BrandTranslationAlreadyExistsException;
       }
-      throw error
+      throw error;
     }
   }
 
@@ -40,16 +40,16 @@ export class BrandTranslationService {
         id,
         updatedById,
         data,
-      })
-      return brand
+      });
+      return brand;
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw BrandTranslationAlreadyExistsException
+        throw BrandTranslationAlreadyExistsException;
       }
       if (isNotFoundPrismaError(error)) {
-        throw NotFoundRecordException
+        throw NotFoundRecordException;
       }
-      throw error
+      throw error;
     }
   }
 
@@ -58,15 +58,15 @@ export class BrandTranslationService {
       await this.brandTranslationRepo.delete({
         id,
         deletedById,
-      })
+      });
       return {
         message: 'Delete successfully',
-      }
+      };
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
-        throw NotFoundRecordException
+        throw NotFoundRecordException;
       }
-      throw error
+      throw error;
     }
   }
 }
